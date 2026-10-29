@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — ShGKM Muzeyi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #030712; color: #f8fafc; min-height: 100vh; padding: 24px; }
+        .admin-container { max-width: 1200px; margin: 0 auto; }
+        .admin-header {
+            background: #0b1329; border: 1px solid rgba(0, 159, 227, 0.4); border-radius: 16px;
+            padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .admin-header h1 { font-size: 20px; color: #38bdf8; }
+        .btn-action {
+            background: #0284c7; color: white; border: none; padding: 9px 16px; border-radius: 8px;
+            font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-action:hover { background: #0369a1; }
+        .btn-reset {
+            background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .btn-reset:hover { background: #ef4444; color: white; }
+        
+        .design-card, .section-card {
+            background: #0b1329; border: 1px solid rgba(51, 65, 85, 0.8); border-radius: 16px;
+            padding: 24px; margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        .design-card { border-color: #009fe3; }
+        
+        .card-title-main {
+            font-size: 17px; font-weight: 700; color: #f37021; margin-bottom: 18px;
+            border-bottom: 1px solid #1e293b; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .member-card-admin {
+            background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+            padding: 20px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 14px;
+        }
+        .preview-box-admin { display: flex; align-items: center; gap: 14px; }
+        .preview-img-admin {
+            width: 85px; height: 110px; object-fit: cover; border-radius: 10px; background: #0f172a;
+            border: 1.5px solid #009fe3; flex-shrink: 0;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 12px; }
+        .input-group label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+        .input-field {
+            background: #0f172a; border: 1px solid #475569; padding: 9px 12px; border-radius: 6px;
+            color: white; font-size: 13.5px; outline: none; width: 100%;
+        }
+        .input-field:focus { border-color: #009fe3; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .timeline-box-admin {
+            background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .timeline-row { display: flex; gap: 10px; align-items: center; }
+        .btn-upload-file {
+            background: #0284c7; color: white; padding: 8px 14px; border-radius: 6px; font-size: 12px;
+            font-weight: 600; text-align: center; cursor: pointer; display: inline-block; transition: 0.2s;
+        }
+        .btn-upload-file:hover { background: #0369a1; }
+        .btn-add-step {
+            background: #009fe3; color: white; border: none; padding: 7px 14px; border-radius: 6px;
+            font-size: 12px; font-weight: 600; cursor: pointer; align-self: flex-start;
+        }
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 7px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; align-self: flex-end;
+        }
+        .btn-delete:hover { background: #ef4444; color: white; }
+        .save-toast {
+            position: fixed; bottom: 24px; right: 24px; background: #10b981; color: white;
+            padding: 14px 28px; border-radius: 12px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>⚙️ Muzey Boshqaruv Paneli (Admin)</h1>
+            <div style="display:flex; gap:12px;">
+                <a href="index.html" target="_blank" class="btn-action">🌐 Saytni ko'rish</a>
+                <button onclick="resetAllData()" class="btn-reset">🔄 Barini Asliga Qaytarish</button>
+            </div>
+        </div>
+
+        <!-- LOGOTIP VA DIZAYN -->
+        <div class="design-card">
+            <div class="card-title-main">🖼️ Logotip va Sarlavhalarni Tahrirlash (3 Tilda)</div>
+            
+            <div class="grid-3" style="margin-bottom:14px;">
+                <div class="input-group">
+                    <label>Asosiy Sarlavha (O'zbek):</label>
+                    <input type="text" id="mainTitleUz" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+                <div class="input-group">
+                    <label>Main Title (English):</label>
+                    <input type="text" id="mainTitleEn" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+                <div class="input-group">
+                    <label>Главный заголовок (Русский):</label>
+                    <input type="text" id="mainTitleRu" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-bottom:14px;">
+                <div class="input-group">
+                    <label>Kichik Sarlavha (O'zbek):</label>
+                    <input type="text" id="subTitleUz" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+                <div class="input-group">
+                    <label>Subtitle (English):</label>
+                    <input type="text" id="subTitleEn" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+                <div class="input-group">
+                    <label>Подзаголовок (Русский):</label>
+                    <input type="text" id="subTitleRu" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-bottom:14px;">
+                <div class="input-group">
+                    <label>Footer Matn (O'zbek):</label>
+                    <input type="text" id="footerUz" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+                <div class="input-group">
+                    <label>Footer Text (English):</label>
+                    <input type="text" id="footerEn" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+                <div class="input-group">
+                    <label>Footer Текст (Русский):</label>
+                    <input type="text" id="footerRu" class="input-field" onchange="saveHeaderSettings()">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Korxona Logotipi (Rasm yuklash):</label>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <label class="btn-upload-file">
+                        📁 Logotip tanlash
+                        <input type="file" accept="image/*" style="display:none;" onchange="uploadLogo(event)">
+                    </label>
+                    <button class="btn-delete" style="padding:7px 12px;" onclick="removeLogo()">Logotipni o'chirish</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BO'LIMLAR VA RAHBARLAR -->
+        <div id="adminSectionsList"></div>
+
+        <button class="btn-action" style="background:#10b981; padding:12px 24px; font-size:14px;" onclick="addSection()">➕ Yangi Bo'lim Qo'shish</button>
+    </div>
+
+    <div id="saveToast" class="save-toast">✅ O'zgarishlar saqlandi!</div>
+
+    <script>
+        const initialMuseumData = [
+            {
+                id: "1",
+                title: { uz: "1. ShGKM rahbarlari", en: "1. SGCC Leaders", ru: "1. Руководители ШГКМ" },
+                members: [
+                    { name: "O'tkir Xusenov", subtitle: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" }, timeline: [{ years: "-", desc: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" } }], img: "" },
+                    { name: "Alimov Baxtiyor Junaidovich", subtitle: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" }, timeline: [{ years: "-", desc: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" } }], img: "" },
+                    { name: "Aliyev Habibullo Mamatvaliyevich", subtitle: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" }, timeline: [{ years: "-", desc: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" } }], img: "" },
+                    { name: "Sultanov Alisher Saidabbasovich", subtitle: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" }, timeline: [{ years: "-", desc: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" } }], img: "" },
+                    { name: "Temirov Odil Shukurovich", subtitle: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" }, timeline: [{ years: "-", desc: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" } }], img: "" },
+                    { name: "Aslanov Shuhrat Choriyevich", subtitle: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" }, timeline: [{ years: "2017 yildan", desc: { uz: "ShGKM rahbari", en: "SGCC Leader", ru: "Руководитель ШГКМ" } }], img: "" }
+                ]
+            },
+            {
+                id: "2",
+                title: { uz: "2. ShGKM bosh muhandislari", en: "2. SGCC Chief Engineers", ru: "2. Главные инженеры ШГКМ" },
+                members: [
+                    { name: "Eshmuradov O'ktam Asadullayevich", subtitle: { uz: "2000-2004 yillar", en: "2000-2004", ru: "2000-2004 гг." }, timeline: [{ years: "2000-2004 yy.", desc: { uz: "ShGKM bosh muhandisi", en: "Chief Engineer", ru: "Главный инженер" } }], img: "" },
+                    { name: "Jo'rayev To'lagan Toshpo'latovich", subtitle: { uz: "2004-2010 yillar", en: "2004-2010", ru: "2004-2010 гг." }, timeline: [{ years: "2004-2010 yy.", desc: { uz: "ShGKM bosh muhandisi", en: "Chief Engineer", ru: "Главный инженер" } }], img: "" },
+                    { name: "Mansurov Bahrom Mamatmurodovich", subtitle: { uz: "2010-2016 yillar", en: "2010-2016", ru: "2010-2016 гг." }, timeline: [{ years: "2010-2016 yy.", desc: { uz: "ShGKM bosh muhandisi", en: "Chief Engineer", ru: "Главный инженер" } }], img: "" },
+                    { name: "Eshmurodov Shokir Musurmonovich", subtitle: { uz: "2017 yildan hozirgacha", en: "2017 - Present", ru: "С 2017 года по настоящее время" }, timeline: [{ years: "2017 yildan", desc: { uz: "ShGKM bosh muhandisi", en: "Chief Engineer", ru: "Главный инженер" } }], img: "" }
+                ]
+            },
+            {
+                id: "3",
+                title: { uz: "3. ShGKM bosh direktorining ishlab chiqarish bo'yicha o'rinbosarlari", en: "3. Deputy General Directors for Production", ru: "3. Заместители генерального директора по производству" },
+                members: [
+                    { name: "Jo'rayev To'lagan Toshpo'latovich", subtitle: { uz: "2001-2004 yillar", en: "2001-2004", ru: "2001-2004 гг." }, timeline: [{ years: "2001-2004 yy.", desc: { uz: "Ishlab chiqarish bo'yicha o'rinbosar", en: "Deputy for Production", ru: "Заместитель по производству" } }], img: "" },
+                    { name: "Eshmurodov Shokir Musurmonovich", subtitle: { uz: "2004-2017 yillar", en: "2004-2017", ru: "2004-2017 гг." }, timeline: [{ years: "2004-2017 yy.", desc: { uz: "Ishlab chiqarish bo'yicha o'rinbosar", en: "Deputy for Production", ru: "Заместитель по производству" } }], img: "" },
+                    { name: "Aslanov Shuhrat Choriyevich", subtitle: { uz: "2017-2018 yillar", en: "2017-2018", ru: "2017-2018 гг." }, timeline: [{ years: "2017-2018 yy.", desc: { uz: "Ishlab chiqarish bo'yicha o'rinbosar", en: "Deputy for Production", ru: "Заместитель по производству" } }], img: "" },
+                    { name: "Isayev O'ktam Jalilovich", subtitle: { uz: "2018 yildan hozirgacha", en: "2018 - Present", ru: "С 2018 года по настоящее время" }, timeline: [{ years: "2018 yildan", desc: { uz: "Ishlab chiqarish bo'yicha o'rinbosar", en: "Deputy for Production", ru: "Заместитель по производству" } }], img: "" }
+                ]
+            },
+            {
+                id: "4",
+                title: { uz: "4. ShGKM bosh direktorining iqtisod masalalari bo'yicha o'rinbosarlari", en: "4. Deputy General Directors for Economic Issues", ru: "4. Заместители гендиректора по экономическим вопросам" },
+                members: [
+                    { name: "Qodirov Erkin Toshpulatovich", subtitle: { uz: "2000-2008 yillar", en: "2000-2008", ru: "2000-2008 гг." }, timeline: [{ years: "2000-2008 yy.", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" },
+                    { name: "Pardayev Abdurashid Ахmatovich", subtitle: { uz: "2008-2012 yillar", en: "2008-2012", ru: "2008-2012 гг." }, timeline: [{ years: "2008-2012 yy.", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" },
+                    { name: "Xafalov Mahkam", subtitle: { uz: "2012-2014 yillar", en: "2012-2014", ru: "2012-2014 гг." }, timeline: [{ years: "2012-2014 yy.", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" },
+                    { name: "Mavlonov Akram Ergashevich", subtitle: { uz: "2015-2018 yillar", en: "2015-2018", ru: "2015-2018 гг." }, timeline: [{ years: "2015-2018 yy.", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" },
+                    { name: "Turdiyev Ahmad Berdishukurovich", subtitle: { uz: "2018-2019 yillar", en: "2018-2019", ru: "2018-2019 гг." }, timeline: [{ years: "2018-2019 yy.", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" },
+                    { name: "Mavlonov Akram Ergashevich", subtitle: { uz: "2019-2021 yillar", en: "2019-2021", ru: "2019-2021 гг." }, timeline: [{ years: "2019-2021 yy.", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" },
+                    { name: "Xalimov Jasur Komilovich", subtitle: { uz: "2021 yildan hozirgacha", en: "2021 - Present", ru: "С 2021 года по настоящее время" }, timeline: [{ years: "2021 yildan", desc: { uz: "Iqtisod bo'yicha o'rinbosar", en: "Deputy for Economics", ru: "Заместитель по экономике" } }], img: "" }
+                ]
+            },
+            {
+                id: "5",
+                title: { uz: "5. ShGKM bosh direktorining umumiy masalalar bo'yicha o'rinbosarlari", en: "5. Deputy General Directors for General Affairs", ru: "5. Заместители гендиректора по общим вопросам" },
+                members: [
+                    { name: "Goyipov Rustam Ruzmetovich", subtitle: { uz: "2000-2004 yillar", en: "2000-2004", ru: "2000-2004 гг." }, timeline: [{ years: "2000-2004 yy.", desc: { uz: "Umumiy masalalar bo'yicha o'rinbosar", en: "Deputy for General Affairs", ru: "Заместитель по общим вопросам" } }], img: "" },
+                    { name: "Daminov Diyor Haydarovich", subtitle: { uz: "2004-2007 yillar", en: "2004-2007", ru: "2004-2007 гг." }, timeline: [{ years: "2004-2007 yy.", desc: { uz: "Umumiy masalalar bo'yicha o'rinbosar", en: "Deputy for General Affairs", ru: "Заместитель по общим вопросам" } }], img: "" },
+                    { name: "Kuvatov Faxriddin Eshqabulovich", subtitle: { uz: "2007 yildan hozirgacha", en: "2007 - Present", ru: "С 2007 года по настоящее время" }, timeline: [{ years: "2007 yildan", desc: { uz: "Umumiy masalalar bo'yicha o'rinbosar", en: "Deputy for General Affairs", ru: "Заместитель по общим вопросам" } }], img: "" }
+                ]
+            },
+            {
+                id: "6",
+                title: { uz: "6. ShGKM bosh direktorining qurilish bo'yicha o'rinbosarlari", en: "6. Deputy General Directors for Construction", ru: "6. Заместители гендиректора по строительству" },
+                members: [
+                    { name: "Sultonov Jononboy", subtitle: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" }, timeline: [{ years: "-", desc: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" } }], img: "" },
+                    { name: "Djalilov Abduqaxhor", subtitle: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" }, timeline: [{ years: "-", desc: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" } }], img: "" },
+                    { name: "Murodov Bobir", subtitle: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" }, timeline: [{ years: "-", desc: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" } }], img: "" },
+                    { name: "Ibadullayevich Gayrat Karimovich", subtitle: { uz: "Hozirgacha", en: "Present", ru: "По настоящее время" }, timeline: [{ years: "yildan", desc: { uz: "Qurilish bo'yicha o'rinbosar", en: "Deputy for Construction", ru: "Заместитель по строительству" } }], img: "" }
+                ]
+            },
+            {
+                id: "7",
+                title: { uz: "7. ShGKM bosh direktorining tijorat bo'yicha o'rinbosarlari", en: "7. Deputy General Directors for Commercial Issues", ru: "7. Заместители гендиректора по коммерческим вопросам" },
+                members: [
+                    { name: "Alisher aka", subtitle: { uz: "Tijorat bo'yicha o'rinbosar", en: "Commercial Deputy", ru: "Коммерческий заместитель" }, timeline: [{ years: "-", desc: { uz: "Tijorat bo'yicha o'rinbosar", en: "Commercial Deputy", ru: "Коммерческий заместитель" } }], img: "" },
+                    { name: "Jabborov Shokir Davlatovich", subtitle: { uz: "Tijorat bo'yicha o'rinbosar", en: "Commercial Deputy", ru: "Коммерческий заместитель" }, timeline: [{ years: "-", desc: { uz: "Tijorat bo'yicha o'rinbosar", en: "Commercial Deputy", ru: "Коммерческий заместитель" } }], img: "" },
+                    { name: "Ochilov Asqar Muxammadiyevich", subtitle: { uz: "2025 yildan", en: "2025 - Present", ru: "С 2025 года" }, timeline: [{ years: "2025 yy.", desc: { uz: "Tijorat bo'yicha o'rinbosar", en: "Commercial Deputy", ru: "Коммерческий заместитель" } }], img: "" }
+                ]
+            }
+        ];
+
+        const defaultHeaderSettings = {
+            mainTitle: { uz: "SHURTAN GAZ-KIMYO MAJMUASI", en: "SHURTAN GAS CHEMICAL COMPLEX", ru: "ШУРТАНСКИЙ ГАЗОХИМИЧЕСКИЙ КОМПЛЕКС" },
+            subTitle: { uz: "Tarixi muzeyi — Mehnat Faollari Bo'limi", en: "History Museum — Labor Activists Department", ru: "Исторический музей — Отдел Трудовых Активистов" },
+            footerText: { uz: "© Shurtan gaz-kimyo majmuasi MCHJ. Barcha huquqlar himoyalangan.", en: "© Shurtan Gas Chemical Complex LLC. All rights reserved.", ru: "© ООО «Шуртанский газохимический комплекс». Все права защищены." },
+            logoImg: ""
+        };
+
+        function getHeaderInfo() {
+            try {
+                const saved = localStorage.getItem('shgkm_header_v6');
+                if (saved) return JSON.parse(saved);
+            } catch(e){}
+            return defaultHeaderSettings;
+        }
+
+        function getData() {
+            try {
+                const saved = localStorage.getItem('shgkm_data_v6');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.length > 0) return parsed;
+                }
+            } catch(e){}
+            return initialMuseumData;
+        }
+
+        function saveData(data) {
+            localStorage.setItem('shgkm_data_v6', JSON.stringify(data));
+            showToast();
+        }
+
+        function saveHeaderSettings() {
+            const info = {
+                mainTitle: {
+                    uz: document.getElementById('mainTitleUz').value,
+                    en: document.getElementById('mainTitleEn').value,
+                    ru: document.getElementById('mainTitleRu').value
+                },
+                subTitle: {
+                    uz: document.getElementById('subTitleUz').value,
+                    en: document.getElementById('subTitleEn').value,
+                    ru: document.getElementById('subTitleRu').value
+                },
+                footerText: {
+                    uz: document.getElementById('footerUz').value,
+                    en: document.getElementById('footerEn').value,
+                    ru: document.getElementById('footerRu').value
+                },
+                logoImg: getHeaderInfo().logoImg || ""
+            };
+            localStorage.setItem('shgkm_header_v6', JSON.stringify(info));
+            showToast();
+        }
+
+        function uploadLogo(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const info = getHeaderInfo();
+                    info.logoImg = event.target.result;
+                    localStorage.setItem('shgkm_header_v6', JSON.stringify(info));
+                    showToast();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeLogo() {
+            const info = getHeaderInfo();
+            info.logoImg = "";
+            localStorage.setItem('shgkm_header_v6', JSON.stringify(info));
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('saveToast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function resetAllData() {
+            if (confirm("Barcha ma'lumotlar va logotipni asl holatiga qaytarishga ishonchingiz komilmi?")) {
+                localStorage.removeItem('shgkm_data_v6');
+                localStorage.removeItem('shgkm_header_v6');
+                loadHeaderInputs();
+                renderAdminSections();
+                showToast();
+            }
+        }
+
+        function loadHeaderInputs() {
+            const info = getHeaderInfo();
+            document.getElementById('mainTitleUz').value = info.mainTitle.uz || '';
+            document.getElementById('mainTitleEn').value = info.mainTitle.en || '';
+            document.getElementById('mainTitleRu').value = info.mainTitle.ru || '';
+
+            document.getElementById('subTitleUz').value = info.subTitle.uz || '';
+            document.getElementById('subTitleEn').value = info.subTitle.en || '';
+            document.getElementById('subTitleRu').value = info.subTitle.ru || '';
+
+            document.getElementById('footerUz').value = info.footerText.uz || '';
+            document.getElementById('footerEn').value = info.footerText.en || '';
+            document.getElementById('footerRu').value = info.footerText.ru || '';
+        }
+
+        function renderAdminSections() {
+            const data = getData();
+            const container = document.getElementById('adminSectionsList');
+            container.innerHTML = '';
+
+            data.forEach((section, sIdx) => {
+                const secEl = document.createElement('div');
+                secEl.className = 'section-card';
+
+                let membersHTML = '';
+                section.members.forEach((m, mIdx) => {
+                    let timelineHTML = '';
+                    if (m.timeline) {
+                        m.timeline.forEach((t, tIdx) => {
+                            const descUz = (typeof t.desc === 'object') ? (t.desc.uz || '') : t.desc;
+                            const descEn = (typeof t.desc === 'object') ? (t.desc.en || '') : '';
+                            const descRu = (typeof t.desc === 'object') ? (t.desc.ru || '') : '';
+
+                            timelineHTML += `
+                                <div class="timeline-row">
+                                    <input type="text" class="input-field" style="width:130px;" value="${t.years}" placeholder="Yillar" onchange="updateTimelineYears(${sIdx}, ${mIdx}, ${tIdx}, this.value)">
+                                    <input type="text" class="input-field" value="${descUz}" placeholder="Tavsif (Uz)" onchange="updateTimelineDesc(${sIdx}, ${mIdx}, ${tIdx}, 'uz', this.value)">
+                                    <input type="text" class="input-field" value="${descEn}" placeholder="Desc (En)" onchange="updateTimelineDesc(${sIdx}, ${mIdx}, ${tIdx}, 'en', this.value)">
+                                    <input type="text" class="input-field" value="${descRu}" placeholder="Описание (Ru)" onchange="updateTimelineDesc(${sIdx}, ${mIdx}, ${tIdx}, 'ru', this.value)">
+                                    <button class="btn-delete" style="padding:6px 10px;" onclick="deleteTimeline(${sIdx}, ${mIdx}, ${tIdx})">❌</button>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    const subUz = (typeof m.subtitle === 'object') ? (m.subtitle.uz || '') : m.subtitle;
+                    const subEn = (typeof m.subtitle === 'object') ? (m.subtitle.en || '') : '';
+                    const subRu = (typeof m.subtitle === 'object') ? (m.subtitle.ru || '') : '';
+
+                    membersHTML += `
+                        <div class="member-card-admin">
+                            <div class="preview-box-admin">
+                                <img src="${m.img || 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2285%22 height=%22110%22><rect width=%22100%%22 height=%22100%%22 fill=%22%230f172a%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2211%22>Rasm yoq</text></svg>'}" class="preview-img-admin">
+                                <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+                                    <div style="display:flex; gap:10px; align-items:center;">
+                                        <label class="btn-upload-file">
+                                            📁 Foto Tanlash
+                                            <input type="file" accept="image/*" style="display:none;" onchange="uploadMemberImg(event, ${sIdx}, ${mIdx})">
+                                        </label>
+                                        <button class="btn-delete" style="padding:6px 10px;" onclick="removeMemberImg(${sIdx}, ${mIdx})">Fotoni o'chirish</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="input-group">
+                                    <label>Ism-Sharif (F.I.Sh):</label>
+                                    <input type="text" class="input-field" value="${m.name}" onchange="updateMember(${sIdx}, ${mIdx}, 'name', this.value)">
+                                </div>
+                                <div class="input-group">
+                                    <label>Lavozim (3 tilda tahrir):</label>
+                                    <div class="grid-3" style="gap:6px;">
+                                        <input type="text" class="input-field" value="${subUz}" placeholder="Uz" onchange="updateSubtitle(${sIdx}, ${mIdx}, 'uz', this.value)">
+                                        <input type="text" class="input-field" value="${subEn}" placeholder="En" onchange="updateSubtitle(${sIdx}, ${mIdx}, 'en', this.value)">
+                                        <input type="text" class="input-field" value="${subRu}" placeholder="Ru" onchange="updateSubtitle(${sIdx}, ${mIdx}, 'ru', this.value)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-box-admin">
+                                <label style="font-size:11px; color:#38bdf8; font-weight:700;">Ishlagan joylari va bosqichlari (3 tilda):</label>
+                                ${timelineHTML}
+                                <button class="btn-add-step" onclick="addTimeline(${sIdx}, ${mIdx})">➕ Ish joyini qo'shish</button>
+                            </div>
+
+                            <button class="btn-delete" onclick="deleteMember(${sIdx}, ${mIdx})">🗑️ Xodimni o'chirish</button>
+                        </div>
+                    `;
+                });
+
+                const tUz = (typeof section.title === 'object') ? (section.title.uz || '') : section.title;
+                const tEn = (typeof section.title === 'object') ? (section.title.en || '') : '';
+                const tRu = (typeof section.title === 'object') ? (section.title.ru || '') : '';
+
+                secEl.innerHTML = `
+                    <div class="card-title-main">
+                        <div style="display:flex; flex-direction:column; gap:6px; flex:1; margin-right:12px;">
+                            <span style="font-size:12px; color:#94a3b8;">Bo'lim nomi (3 tilda):</span>
+                            <div class="grid-3" style="gap:8px;">
+                                <input type="text" class="input-field" value="${tUz}" placeholder="Uz" onchange="updateSectionTitle(${sIdx}, 'uz', this.value)">
+                                <input type="text" class="input-field" value="${tEn}" placeholder="En" onchange="updateSectionTitle(${sIdx}, 'en', this.value)">
+                                <input type="text" class="input-field" value="${tRu}" placeholder="Ru" onchange="updateSectionTitle(${sIdx}, 'ru', this.value)">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-self:flex-end;">
+                            <button class="btn-action" style="background:#10b981; padding:7px 12px; font-size:12px;" onclick="addMember(${sIdx})">➕ Mutaxassis qo'shish</button>
+                            <button class="btn-delete" style="padding:7px 12px; font-size:12px;" onclick="deleteSection(${sIdx})">🗑️ Bo'limni o'chirish</button>
+                        </div>
+                    </div>
+                    <div>${membersHTML}</div>
+                `;
+                container.appendChild(secEl);
+            });
+        }
+
+        function updateSectionTitle(sIdx, lang, val) {
+            const data = getData();
+            if (typeof data[sIdx].title !== 'object') {
+                data[sIdx].title = { uz: data[sIdx].title, en: '', ru: '' };
+            }
+            data[sIdx].title[lang] = val;
+            saveData(data);
+        }
+
+        function updateMember(sIdx, mIdx, key, val) {
+            const data = getData();
+            data[sIdx].members[mIdx][key] = val;
+            saveData(data);
+        }
+
+        function updateSubtitle(sIdx, mIdx, lang, val) {
+            const data = getData();
+            let sub = data[sIdx].members[mIdx].subtitle;
+            if (typeof sub !== 'object') {
+                sub = { uz: sub || '', en: '', ru: '' };
+            }
+            sub[lang] = val;
+            data[sIdx].members[mIdx].subtitle = sub;
+            saveData(data);
+        }
+
+        function updateTimelineYears(sIdx, mIdx, tIdx, val) {
+            const data = getData();
+            data[sIdx].members[mIdx].timeline[tIdx].years = val;
+            saveData(data);
+        }
+
+        function updateTimelineDesc(sIdx, mIdx, tIdx, lang, val) {
+            const data = getData();
+            let desc = data[sIdx].members[mIdx].timeline[tIdx].desc;
+            if (typeof desc !== 'object') {
+                desc = { uz: desc || '', en: '', ru: '' };
+            }
+            desc[lang] = val;
+            data[sIdx].members[mIdx].timeline[tIdx].desc = desc;
+            saveData(data);
+        }
+
+        function addTimeline(sIdx, mIdx) {
+            const data = getData();
+            if(!data[sIdx].members[mIdx].timeline) data[sIdx].members[mIdx].timeline = [];
+            data[sIdx].members[mIdx].timeline.push({ years: "202X", desc: { uz: "Ish joyi", en: "Job", ru: "Место работы" } });
+            saveData(data);
+            renderAdminSections();
+        }
+
+        function deleteTimeline(sIdx, mIdx, tIdx) {
+            const data = getData();
+            data[sIdx].members[mIdx].timeline.splice(tIdx, 1);
+            saveData(data);
+            renderAdminSections();
+        }
+
+        function uploadMemberImg(e, sIdx, mIdx) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const data = getData();
+                    data[sIdx].members[mIdx].img = event.target.result;
+                    saveData(data);
+                    renderAdminSections();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeMemberImg(sIdx, mIdx) {
+            const data = getData();
+            data[sIdx].members[mIdx].img = "";
+            saveData(data);
+            renderAdminSections();
+        }
+
+        function addMember(sIdx) {
+            const data = getData();
+            data[sIdx].members.push({
+                name: "Yangi Mutaxassis",
+                subtitle: { uz: "Lavozimi", en: "Position", ru: "Должность" },
+                timeline: [{ years: "202X", desc: { uz: "Ish joyi", en: "Job", ru: "Место работы" } }],
+                img: ""
+            });
+            saveData(data);
+            renderAdminSections();
+        }
+
+        function deleteMember(sIdx, mIdx) {
+            if(confirm("Ushbu xodimni o'chirmoqchimisiz?")) {
+                const data = getData();
+                data[sIdx].members.splice(mIdx, 1);
+                saveData(data);
+                renderAdminSections();
+            }
+        }
+
+        function addSection() {
+            const data = getData();
+            data.push({
+                id: Date.now().toString(),
+                title: { uz: "Yangi bo'lim", en: "New Section", ru: "Новый раздел" },
+                members: []
+            });
+            saveData(data);
+            renderAdminSections();
+        }
+
+        function deleteSection(sIdx) {
+            if(confirm("Ushbu bo'limni to'liq o'chirmoqchimisiz?")) {
+                const data = getData();
+                data.splice(sIdx, 1);
+                saveData(data);
+                renderAdminSections();
+            }
+        }
+
+        loadHeaderInputs();
+        renderAdminSections();
+    </script>
+</body>
+</html>
